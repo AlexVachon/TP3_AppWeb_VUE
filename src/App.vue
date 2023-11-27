@@ -1,18 +1,17 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+import MessageAccueil from './components/MessageAccueil.vue'
 </script>
 
 <template>
   <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
+    <img class="border-light-subtle border-end logo" alt="Vue logo" src="@/assets/logo_parking.svg" width="100" height="100" />
     <div class="wrapper">
-      <HelloWorld msg="You did it!" />
+      <MessageAccueil msg="GareNoTicket" />
 
       <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
+        <RouterLink to="/" class="link-success">Connexion</RouterLink>
+        <RouterLink to="/sign" class="link-success">Créer un compte</RouterLink>
       </nav>
     </div>
   </header>
@@ -25,7 +24,6 @@ header {
   line-height: 1.5;
   max-height: 100vh;
 }
-
 .logo {
   display: block;
   margin: 0 auto 2rem;
