@@ -44,15 +44,18 @@ export default {
         })
       })
         .then(response => {
-          if (response.ok) {
-            return response.json()
+          if (response.status === 200) {
+            return response.json();
+          } else if (response.status === 401) {
+            throw new Error("Adresse e-mail ou mot de passe incorrect.");
           } else {
-            throw new Error("Adresse e-mail ou mot de passe incorrect.")
+            throw new Error("Erreur lors de la connexion.");
           }
         })
         .then(data => {
           localStorage.setItem('jwt', data.token)
-          this.$router.push('/')
+          console.log("Token: ", localStorage.getItem('jwt'))
+          location.href = '/' //Necessaire pour recharger la page
         })
         .catch(error => {
           this.errorMessage = error.message
@@ -61,5 +64,3 @@ export default {
   }
 }
 </script>
-
-<style></style>

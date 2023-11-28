@@ -1,23 +1,45 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/LogIn.vue'
+import { createRouter, createWebHistory } from 'vue-router';
+
+const routes = [
+  {
+    path: '/',
+    name: 'home',
+    component: () => import('../views/Accueil.vue'),
+  },
+  {
+    path: '/profil',
+    name: 'profil',
+    component: () => import('../views/Profil.vue'),
+  },
+  {
+    path: '/transaction',
+    name: 'transaction',
+    component: () => import('../views/Transaction.vue'),
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: () => import('../views/LogIn.vue')
+  },
+  {
+    path: '/sign',
+    name: 'sign',
+    component: () => import('../views/SignUp.vue')
+  }
+]
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [
-    {
-      path: '/',
-      name: 'login',
-      component: HomeView
-    },
-    {
-      path: '/sign',
-      name: 'sign',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/SignUp.vue')
-    }
-  ]
-})
+  routes,
+});
 
-export default router
+router.beforeEach((to, from, next) => {
+  const isAuthenticated = !!localStorage.getItem('jwt');
+  if (!isAuthenticated && to.name == 'home') {
+    next({ name: 'login' });
+  } else {
+    next();
+  }
+});
+
+export default router;

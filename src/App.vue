@@ -4,26 +4,54 @@ import MessageAccueil from './components/MessageAccueil.vue'
 </script>
 
 <template>
-  <header>
-    <img class="border-light-subtle border-end logo" alt="Vue logo" src="@/assets/logo_parking.svg" width="100" height="100" />
-    <div class="wrapper">
-      <MessageAccueil msg="GareNoTicket" />
-
-      <nav>
-        <RouterLink to="/" class="link-success">Connexion</RouterLink>
-        <RouterLink to="/sign" class="link-success">Créer un compte</RouterLink>
-      </nav>
+  <div class="flex-layout" v-if="!isAuthenticated">
+    <div class="grid-layout">
+      <header>
+        <img class="border-light-subtle border-end border-bottom logo" alt="Vue logo" src="@/assets/logo_parking.svg"
+          width="100" height="100" />
+        <div class="wrapper">
+          <MessageAccueil msg="GareNoTicket" />
+          <nav>
+            <RouterLink :to="{ name: 'login' }" class="link-success">Connexion</RouterLink>
+            <RouterLink :to="{ name: 'sign' }" class="link-success">Créer un compte</RouterLink>
+          </nav>
+        </div>
+      </header>
+      <RouterView />
     </div>
-  </header>
-
-  <RouterView />
+  </div>
 </template>
+
+<script>
+export default {
+  data() {
+    const isAuthenticated = !!localStorage.getItem('jwt')
+    console.log(isAuthenticated)
+    return { isAuthenticated }
+  }
+}
+</script>
 
 <style scoped>
 header {
   line-height: 1.5;
   max-height: 100vh;
 }
+
+.flex-layout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.grid-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  place-content: center;
+  height: 100vh;
+  padding: 0 2rem;
+}
+
 .logo {
   display: block;
   margin: 0 auto 2rem;
@@ -75,7 +103,6 @@ nav a:first-of-type {
     text-align: left;
     margin-left: -1rem;
     font-size: 1rem;
-
     padding: 1rem 0;
     margin-top: 1rem;
   }
