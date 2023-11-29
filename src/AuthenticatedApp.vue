@@ -15,16 +15,16 @@ import { RouterLink, RouterView } from 'vue-router'
           <div class="collapse navbar-collapse" id="navbarNavDropdown">
             <ul class="navbar-nav">
               <li class="nav-item">
-                <RouterLink class="nav-link link-success" :to="{ name: 'home' }">MA PLACE</RouterLink>
+                <RouterLink class="nav-link link-success shadow-sm" :to="{ name: 'home' }">MA PLACE</RouterLink>
               </li>
               <li class="nav-item">
-                <RouterLink class="nav-link link-success" :to="{ name: 'profil' }">PROFIL</RouterLink>
+                <RouterLink class="nav-link link-success shadow-sm" :to="{ name: 'profil' }">PROFIL</RouterLink>
               </li>
               <li class="nav-item">
-                <RouterLink class="nav-link link-success" :to="{ name: 'transaction' }">TRANSACTION</RouterLink>
+                <RouterLink class="nav-link link-success shadow-sm" :to="{ name: 'transaction' }">TRANSACTION</RouterLink>
               </li>
               <li class="nav-item">
-                <button @click="logout" class="nav-link link-success">DÉCONNEXION</button>
+                <button @click="logout" class="nav-link link-success shadow-sm">DÉCONNEXION</button>
               </li>
             </ul>
           </div>
