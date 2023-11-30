@@ -20,7 +20,7 @@
                         <div class="mb-3">
                             <label for="email" class="form-label">Email</label>
                             <input type="email" class="form-control" v-model="userInfo.email" id="email"
-                                :class="{ 'is-invalid': !validateEmail(), 'is-valid': validateEmail()}" />
+                                :class="{ 'is-invalid': !validateEmail(), 'is-valid': validateEmail() }" />
                             <div v-if="!validateEmail()" class="invalid-feedback">Adresse courriel invalide</div>
                         </div>
                     </section>
@@ -36,7 +36,7 @@
                             <div class="mb-3">
                                 <label for="licensePlate" class="form-label">Immatriculation</label>
                                 <input type="text" class="form-control" v-model="carInfo.licensePlate" id="licensePlate"
-                                    :class="{ 'is-invalid':!validateLicensePlate(), 'is-valid': validateLicensePlate()}" />
+                                    :class="{ 'is-invalid': !validateLicensePlate(), 'is-valid': validateLicensePlate() }" />
                                 <div v-if="!validateLicensePlate()" class="invalid-feedback">
                                     Doit contenir 6 caractères
                                 </div>
@@ -67,7 +67,8 @@
                             </div>
                         </div>
                     </section>
-                    <button type="submit" class="btn btn-success shadow-sm mt-3">Mettre à jour le profil</button>
+                    <button type="submit" class="btn btn-success shadow-sm mt-3" :disabled="!isFormValid">Mettre à jour le
+                        profil</button>
                 </form>
             </div>
         </div>
@@ -93,6 +94,7 @@ export default {
             },
             userValidationMessage: '',
             carValidationMessage: '',
+            isFormValid: false,
         };
     },
     mounted() {
@@ -114,11 +116,11 @@ export default {
                 this.userInfo.name = data.user.data.username;
                 this.userInfo.email = data.user.data.email;
                 if (data.user.data.voiture) {
-                    this.carInfo.licensePlate = data.user.voiture.plaque;
-                    this.carInfo.model = data.user.voiture.modele;
-                    this.carInfo.color = data.user.voiture.couleur;
-                    this.carInfo.brand = data.user.voiture.marque;
-                }else{
+                    this.carInfo.licensePlate = data.user.data.voiture.plaque;
+                    this.carInfo.model = data.user.data.voiture.modele;
+                    this.carInfo.color = data.user.data.voiture.couleur;
+                    this.carInfo.brand = data.user.data.voiture.marque;
+                } else {
                     this.carValidationMessage = "Aucune voiture !"
                 }
             })
@@ -145,46 +147,66 @@ export default {
             return /^[A-Za-z]{3,50}$/.test(this.carInfo.color.trim());
         },
         updateProfile() {
-            fetch(`https://api-garenoticket-604fa7d27199.herokuapp.com/user/${jwtDecode(localStorage.getItem('jwt')).id}`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('jwt')}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    email: this.userInfo.email,
-                    username: this.userInfo.name,
+            if (this.isFormValid) {
+                fetch(`https://api-garenoticket-604fa7d27199.herokuapp.com/user/${jwtDecode(localStorage.getItem('jwt')).id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('jwt')}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: this.userInfo.email,
+                        username: this.userInfo.name,
+                    })
                 })
-            })
-                .then(response => {
-                    return response.json()
+                    .then(response => {
+                        return response.json()
+                    })
+                    .then(data => {
+                        console.log(data.message)
+                        this.userValidationMessage = data.message
+                    })
+                    .catch(error => console.error('Erreur lors de la mise à jour du profil', error));
+                fetch(`https://api-garenoticket-604fa7d27199.herokuapp.com/car/${jwtDecode(localStorage.getItem('jwt')).id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('jwt')}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        marque: this.carInfo.marque,
+                        modele: this.carInfo.model,
+                        couleur: this.carInfo.color,
+                        plaque: this.carInfo.licensePlate
+                    })
                 })
-                .then(data => {
-                    console.log(data.message)
-                    this.userValidationMessage = data.message
-                })
-                .catch(error => console.error('Erreur lors de la mise à jour du profil', error));
-            fetch(`https://api-garenoticket-604fa7d27199.herokuapp.com/car/${jwtDecode(localStorage.getItem('jwt')).id}`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('jwt')}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    marque: this.carInfo.marque,
-                    modele: this.carInfo.model,
-                    couleur: this.carInfo.color,
-                    plaque: this.carInfo.licensePlate
-                })
-            })
-                .then(response => {
-                    return response.json()
-                })
-                .then(data => {
-                    console.log(data.message)
-                    this.carValidationMessage = data.message
-                })
-                .catch(error => console.error('Erreur lors de la récupération des informations de l\'utilisateur', error))
+                    .then(response => {
+                        return response.json()
+                    })
+                    .then(data => {
+                        console.log(data.message)
+                        this.carValidationMessage = data.message
+                    })
+                    .catch(error => console.error('Erreur lors de la récupération des informations de l\'utilisateur', error))
+            } else {
+                console.error("Le formulaire n'est pas valide. Veuillez corriger les champs invalides.");
+            }
+
+        },
+    },
+    watch: {
+        // Surveillez les changements dans les champs et mettez à jour isFormValid en conséquence
+        userInfo: {
+            deep: true,
+            handler() {
+                this.isFormValid = this.validateName() && this.validateEmail();
+            },
+        },
+        carInfo: {
+            deep: true,
+            handler() {
+                this.isFormValid = this.validateLicensePlate() && this.validateBrand() && this.validateModel() && this.validateColor();
+            },
         },
     },
 };
