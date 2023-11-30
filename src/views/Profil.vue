@@ -4,60 +4,64 @@
             <div class="card-body">
                 <form @submit.prevent="updateProfile">
                     <section>
-                        <h2>Informations personnelles</h2>
-                        <div v-if="userValidationMessage" class="alert alert-info w-75" role="alert">
-                            {{ userValidationMessage }}
+                        <div class="d-flex align-items-center justify-content-between">
+                            <h2>Informations personnelles</h2>
+                            <div v-if="userValidationMessage" class="text-info">
+                                {{ userValidationMessage }}
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label for="name" class="form-label">Nom</label>
                             <input type="text" class="form-control" v-model="userInfo.name" id="name"
-                                :class="{ 'is-invalid': !validateName() }" />
+                                :class="{ 'is-invalid': !validateName(), 'is-valid': validateName() }" />
                             <div v-if="!validateName()" class="invalid-feedback">Le nom doit contenir de 3 à 50 caractères
                                 alphanumériques</div>
                         </div>
                         <div class="mb-3">
                             <label for="email" class="form-label">Email</label>
                             <input type="email" class="form-control" v-model="userInfo.email" id="email"
-                                :class="{ 'is-invalid': !validateEmail() }" />
+                                :class="{ 'is-invalid': !validateEmail(), 'is-valid': validateEmail()}" />
                             <div v-if="!validateEmail()" class="invalid-feedback">Adresse courriel invalide</div>
                         </div>
                     </section>
 
                     <section class="card">
                         <div class="card-body">
-                            <h2>Voiture</h2>
-                            <div v-if="carValidationMessage" class="alert alert-info w-75" role="alert">
-                                {{ carValidationMessage }}
+                            <div class="d-flex align-items-center justify-content-between">
+                                <h2>Voiture</h2>
+                                <div v-if="carValidationMessage" class="text-info">
+                                    {{ carValidationMessage }}
+                                </div>
                             </div>
                             <div class="mb-3">
                                 <label for="licensePlate" class="form-label">Immatriculation</label>
                                 <input type="text" class="form-control" v-model="carInfo.licensePlate" id="licensePlate"
-                                    :class="{ 'is-invalid': carInfo.licensePlate && !validateLicensePlate() }" />
-                                <div v-if="carInfo.licensePlate && !validateLicensePlate()" class="invalid-feedback">
+                                    :class="{ 'is-invalid':!validateLicensePlate(), 'is-valid': validateLicensePlate()}" />
+                                <div v-if="!validateLicensePlate()" class="invalid-feedback">
                                     Doit contenir 6 caractères
                                 </div>
                             </div>
                             <div class="mb-3">
                                 <label for="brand" class="form-label">Marque</label>
                                 <input type="text" class="form-control" v-model="carInfo.brand" id="brand"
-                                    :class="{ 'is-invalid': carInfo.brand && !validateBrand() }" />
-                                <div v-if="carInfo.brand && !validateBrand()" class="invalid-feedback">
+                                    :class="{ 'is-invalid': !validateBrand(), 'is-valid': validateBrand() }" />
+                                <div v-if="!validateBrand()" class="invalid-feedback">
                                     La marque doit contenir entre 1 et 50 caractères
                                 </div>
                             </div>
                             <div class="mb-3">
                                 <label for="model" class="form-label">Modèle</label>
                                 <input type="text" class="form-control" v-model="carInfo.model" id="model"
-                                    :class="{ 'is-invalid': carInfo.model && !validateModel() }" />
-                                <div v-if="carInfo.model && !validateModel()" class="invalid-feedback">
+                                    :class="{ 'is-invalid': !validateModel(), 'is-valid': validateModel() }" />
+                                <div v-if="!validateModel()" class="invalid-feedback">
                                     Le modèle doit contenir entre 1 et 50 caractères
                                 </div>
                             </div>
                             <div class="mb-3">
                                 <label for="color" class="form-label">Couleur</label>
                                 <input type="text" class="form-control" v-model="carInfo.color" id="color"
-                                    :class="{ 'is-invalid': carInfo.color && !validateColor() }" />
-                                <div v-if="carInfo.color && !validateColor()" class="invalid-feedback">
+                                    :class="{ 'is-invalid': !validateColor(), 'is-valid': validateColor() }" />
+                                <div v-if="!validateColor()" class="invalid-feedback">
                                     La couleur doit contenir entre 3 et 50 caractères
                                 </div>
                             </div>
@@ -114,6 +118,8 @@ export default {
                     this.carInfo.model = data.user.voiture.modele;
                     this.carInfo.color = data.user.voiture.couleur;
                     this.carInfo.brand = data.user.voiture.marque;
+                }else{
+                    this.carValidationMessage = "Aucune voiture !"
                 }
             })
             .catch(error => console.error('Erreur lors de la récupération des informations de l\'utilisateur', error));
@@ -154,6 +160,7 @@ export default {
                     return response.json()
                 })
                 .then(data => {
+                    console.log(data.message)
                     this.userValidationMessage = data.message
                 })
                 .catch(error => console.error('Erreur lors de la mise à jour du profil', error));
@@ -174,6 +181,7 @@ export default {
                     return response.json()
                 })
                 .then(data => {
+                    console.log(data.message)
                     this.carValidationMessage = data.message
                 })
                 .catch(error => console.error('Erreur lors de la récupération des informations de l\'utilisateur', error))
