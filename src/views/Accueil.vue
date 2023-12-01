@@ -69,12 +69,9 @@ export default {
                 .then(data => {
                     this.hasCar = data.user.data.voiture ? true : false;
                     this.isParked = data.user.data.voiture.isParked;
-                    this.carPosition.latitude = data.user.data.voiture?.latitude || 0;
-                    this.carPosition.longitude = data.user.data.voiture?.longitude || 0;
-                    this.hasNoPosition = this.carPosition.latitude === 0 && this.carPosition.longitude === 0;
-                    console.log("isParked: ", this.isParked)
-                    console.log("lat: ", this.carPosition.latitude)
-                    console.log("long: ", this.carPosition.longitude)
+                    this.carPosition.latitude = data.user.data.voiture?.latitude
+                    this.carPosition.longitude = data.user.data.voiture?.longitude
+                    this.hasNoPosition = !this.carPosition.latitude && !this.carPosition.longitude;
                 })
                 .catch(error => console.error("Erreur lors la récupération des données de l'utilisateur: ", error));
         },
@@ -126,8 +123,6 @@ export default {
             if (!this.isParked) {
                 this.carPosition.latitude = e.target.getLatLng().lat;
                 this.carPosition.longitude = e.target.getLatLng().lng;
-                console.log(this.carPosition.latitude);
-                console.log(this.carPosition.longitude);
 
                 this.carMarker.setPopupContent('Nouvelle position');
             }
@@ -156,7 +151,6 @@ export default {
                 .then(response => response.json())
                 .then(data => {
                     this.isParked = data.voiture.isParked;
-                    console.log(data)
                 })
                 .catch(error => console.error('Erreur lors de la sauvegarde de la position de la voiture : ', error));
         },
@@ -167,7 +161,7 @@ export default {
 
             if (this.carMarker) {
                 this.carMarker.dragging.enable();
-            }   
+            }
 
             fetch(`https://api-garenoticket-604fa7d27199.herokuapp.com/car/${carId}`, {
                 method: 'PUT',
@@ -187,7 +181,6 @@ export default {
                     this.carPosition.latitude = data.voiture.latitude
                     this.carPosition.longitude = data.voiture.longitude
                     this.hasNoPosition = true
-                    console.log(data)
                 })
                 .catch(error => console.error('Erreur lors de la sauvegarde de la position de la voiture : ', error));
         },
