@@ -7,7 +7,7 @@
                     <p>Chargement en cours...</p>
                 </div>
             </div>
-            <div ref="map" style="height: 400px;"></div>
+            <div id="map" style="height: 400px;"></div>
             <div class="card-body border-top bg-light-subtle shadow">
                 <div class="d-flex justify-content-center">
                     <a href="#" @click="saveCarPosition" class="btn btn-light shadow-sm mx-2"
@@ -33,7 +33,6 @@ export default {
             isParked: false,
             carPosition: { latitude: 0, longitude: 0 },
             hasNoPosition: true,
-            map: null,
             carMarker: null,
         };
     },
@@ -70,24 +69,28 @@ export default {
                 .then(data => {
                     this.hasCar = data.user.data.voiture ? true : false;
                     this.isParked = data.user.data.voiture.isParked;
-                    console.log(this.isParked);
                     this.carPosition.latitude = data.user.data.voiture?.latitude || 0;
-                    console.log(this.carPosition.latitude);
                     this.carPosition.longitude = data.user.data.voiture?.longitude || 0;
-                    console.log(this.carPosition.longitude);
                     this.hasNoPosition = this.carPosition.latitude === 0 && this.carPosition.longitude === 0;
+                    console.log("isParked: ", this.isParked)
+                    console.log("lat: ", this.carPosition.latitude)
+                    console.log("long: ", this.carPosition.longitude)
                 })
                 .catch(error => console.error("Erreur lors la récupération des données de l'utilisateur: ", error));
         },
         initializeMap(latitude, longitude) {
-            const mapContainer = this.$refs.map;
+            const mapContainer = document.getElementById('map')
 
             if (!mapContainer) {
                 console.error('Map container not found.');
                 return;
             }
 
-            this.map = L.map(mapContainer, { zoomControl: false }).setView([latitude, longitude], 13);
+            if (this.map) {
+                this.map.remove();
+            }
+
+            this.map = L.map(mapContainer, { zoomControl: true }).setView([latitude, longitude], 13);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap contributors'
@@ -98,58 +101,45 @@ export default {
             } else {
                 this.showCurrentPosition();
             }
-
-            this.map.on('click', this.onMapClick);
-            this.map.on('zoomend', this.onMapZoomEnd);
         },
+        showCurrentPosition() {
+            this.carMarker = L.marker([this.map.getCenter().lat, this.map.getCenter().lng], { draggable: !this.isParked })
+                .addTo(this.map)
+                .bindPopup('Ma voiture')
+                .openPopup();
 
+            this.carMarker.on('dragend', this.onMarkerDragEnd);
+        },
         showCarPosition() {
             this.map.flyTo([this.carPosition.latitude, this.carPosition.longitude], this.map.getZoom());
             this.showCarMarker();
         },
         showCarMarker() {
-            this.carMarker = L.marker([this.carPosition.latitude, this.carPosition.longitude], { draggable: true })
+            this.carMarker = L.marker([this.carPosition.latitude, this.carPosition.longitude], { draggable: !this.isParked })
                 .addTo(this.map)
-                .bindPopup('Position de votre voiture.')
+                .bindPopup('Ma voiture')
                 .openPopup();
 
-            if (this.isParked) {
-                this.carMarker.dragging.disable();
-                this.carMarker.off('click');
-                this.map.off('click');
-            } else {
-                this.carMarker.on('dragend', this.onMarkerDragEnd);
-            }
-        },
-        onMapClick(e) {
-            if (!this.isParked) {
-                if (this.carMarker) {
-                    this.map.removeLayer(this.carMarker);
-                }
-
-                this.carMarker = L.marker(e.latlng, { draggable: true })
-                    .addTo(this.map)
-                    .bindPopup('Ma voiture\nNouvelle position !')
-                    .openPopup();
-
-                this.hasCar = true;
-                this.hasNoPosition = false;
-
-                this.carMarker.on('dragend', this.onMarkerDragEnd);
-            }
+            this.carMarker.on('dragend', this.onMarkerDragEnd);
         },
         onMarkerDragEnd(e) {
-            this.carPosition.latitude = e.target.getLatLng().lat;
-            this.carPosition.longitude = e.target.getLatLng().lng;
-            console.log(this.carPosition.latitude);
-            console.log(this.carPosition.longitude);
+            if (!this.isParked) {
+                this.carPosition.latitude = e.target.getLatLng().lat;
+                this.carPosition.longitude = e.target.getLatLng().lng;
+                console.log(this.carPosition.latitude);
+                console.log(this.carPosition.longitude);
 
-            this.carMarker.setPopupContent('Nouvelle position');
+                this.carMarker.setPopupContent('Nouvelle position');
+            }
         },
         saveCarPosition() {
             const userId = jwtDecode(localStorage.getItem('jwt')).id;
             const carId = userId;
             const isParked = !this.isParked;
+
+            if (this.carMarker) {
+                this.carMarker.dragging.disable();
+            }
 
             fetch(`https://api-garenoticket-604fa7d27199.herokuapp.com/car/${carId}`, {
                 method: 'PUT',
@@ -165,8 +155,8 @@ export default {
             })
                 .then(response => response.json())
                 .then(data => {
-                    this.isParked = isParked;
-                    console.log(data);
+                    this.isParked = data.voiture.isParked;
+                    console.log(data)
                 })
                 .catch(error => console.error('Erreur lors de la sauvegarde de la position de la voiture : ', error));
         },
@@ -174,6 +164,10 @@ export default {
             const userId = jwtDecode(localStorage.getItem('jwt')).id;
             const carId = userId;
             const isParked = !this.isParked;
+
+            if (this.carMarker) {
+                this.carMarker.dragging.enable();
+            }   
 
             fetch(`https://api-garenoticket-604fa7d27199.herokuapp.com/car/${carId}`, {
                 method: 'PUT',
@@ -183,19 +177,19 @@ export default {
                 },
                 body: JSON.stringify({
                     isParked: isParked,
+                    latitude: null,
+                    longitude: null,
                 })
             })
                 .then(response => response.json())
                 .then(data => {
-                    this.isParked = isParked;
-                    console.log(data);
+                    this.isParked = data.voiture.isParked;
+                    this.carPosition.latitude = data.voiture.latitude
+                    this.carPosition.longitude = data.voiture.longitude
+                    this.hasNoPosition = true
+                    console.log(data)
                 })
                 .catch(error => console.error('Erreur lors de la sauvegarde de la position de la voiture : ', error));
-        },
-        onMapZoomEnd() {
-            if (this.carMarker) {
-                this.carMarker.setLatLng(this.map.getCenter());
-            }
         },
     },
 };
