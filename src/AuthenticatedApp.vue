@@ -43,8 +43,7 @@ export default {
   methods: {
     logout() {
       localStorage.removeItem('jwt')
-      this.$router.push({ name: 'home' })
-      location.reload()
+      location.href = "/login"
     }
   }
 }
