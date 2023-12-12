@@ -9,7 +9,7 @@
                         </div>
                         <div>
                             <div class="badge rounded-pill text-bg-success">
-                                11
+                                {{ montantPayer }}
                             </div>
                         </div>
                     </div>
@@ -80,7 +80,8 @@ export default {
     data() {
         return {
             factures: [],
-            historique: []
+            historique: [],
+            montantPayer: 0.0,
         }
     },
     mounted() {
@@ -104,7 +105,6 @@ export default {
                     }
                 })
                 .then(data => {
-                    console.log(data)
                     this.factures = data
                 })
                 .catch(error => console.error(error))
@@ -125,8 +125,13 @@ export default {
                     }
                 })
                 .then(data => {
-                    console.log(data)
                     this.historique = data
+                    let total = 0.0
+                    for(d in data){
+                        if(!data.isPaid){
+                            total += data.price
+                        }
+                    }
                 })
                 .catch(error => console.error(error))
         }

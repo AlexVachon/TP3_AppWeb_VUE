@@ -2,6 +2,9 @@
     <div>
         <div class="card shadow m-auto my-5" style="max-width: 50%; min-width: 350px;">
             <div class="card-body">
+                <div v-if="isParked" class="alert alert-info">
+                    Vous ne pouvez pas modifier votre profil pendant que votre voiture est stationnée
+                </div>
                 <form @submit.prevent="updateProfile">
                     <section>
                         <div class="d-flex align-items-center justify-content-between">
@@ -95,9 +98,11 @@ export default {
             userValidationMessage: '',
             carValidationMessage: '',
             isFormValid: false,
+            isParked: false
         };
     },
     mounted() {
+        this.checkCarStatus()
         fetch(`https://api-garenoticket-604fa7d27199.herokuapp.com/user?userId=${jwtDecode(localStorage.getItem('jwt')).id}`, {
             method: 'GET',
             headers: {
@@ -128,6 +133,21 @@ export default {
 
     },
     methods: {
+        checkCarStatus() {
+            fetch(`https://api-garenoticket-604fa7d27199.herokuapp.com/user?userId=${jwtDecode(localStorage.getItem('jwt')).id}`, {
+                method: "GET",
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('jwt')}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    this.isParked = data.user.data.voiture.isParked;
+                    console.log(this.isParked)
+                })
+                .catch(error => console.error("Erreur lors la récupération des données de l'utilisateur: ", error));
+        },
         validateName() {
             return /^[A-Za-z0-9]{3,50}$/.test(this.userInfo.name.trim());
         },
