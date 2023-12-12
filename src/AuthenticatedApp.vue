@@ -20,7 +20,7 @@ import { RouterLink, RouterView } from 'vue-router'
               <li class="nav-item">
                 <RouterLink class="nav-link link-success shadow-sm" :to="{ name: 'profil' }">PROFIL</RouterLink>
               </li>
-              <li class="nav-item">
+              <li class="nav-item" v-if="isValet">
                 <RouterLink class="nav-link link-success shadow-sm" :to="{ name: 'transaction' }">TRANSACTION</RouterLink>
               </li>
               <li class="nav-item">
@@ -39,11 +39,20 @@ import { RouterLink, RouterView } from 'vue-router'
 
 
 <script>
+import { jwtDecode } from 'jwt-decode';
 export default {
   methods: {
+    data(){
+      return{
+        isValet: false
+      }
+    },
     logout() {
       localStorage.removeItem('jwt')
       location.href = "/login"
+    },
+    checkIfValet(){
+      this.isValet = jwtDecode(localStorage.getItem('jwt')).isValet
     }
   }
 }

@@ -25,7 +25,12 @@ const routes = [
     path: '/sign',
     name: 'sign',
     component: () => import('../views/SignUp.vue')
-  }
+  },
+  {
+    path: '/moveCar/:idUser',
+    name: 'moveCar',
+    component: () => import('../views/MoveCar.vue'),
+  },
 ]
 
 const router = createRouter({

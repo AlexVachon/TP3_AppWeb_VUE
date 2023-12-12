@@ -37,9 +37,15 @@
                                 <td>{{ user.voiture.plaque }}</td>
                                 <td>{{ user.voiture.couleur }}</td>
                                 <td>{{ user.voiture.timeRemaining }}</td>
+                                <td>
+                                    <img @click="zoomToMarker(user.voiture)" class="mx-1 icon" src="/icons/zoomTo.png"
+                                        alt="Zoomer">
+
+                                    <img @click="moveCar(user._id)" class="mx-1 icon" src="/icons/moveCar.png"
+                                        alt="Move Car">
+                                </td>
                             </tr>
                         </tbody>
-
                     </table>
                 </div>
 
@@ -49,9 +55,9 @@
 </template>
   
 <script>
-import { jwtDecode } from 'jwt-decode';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
+    import { jwtDecode } from 'jwt-decode';
+    import 'leaflet/dist/leaflet.css';
+    import L from 'leaflet';
 
 export default {
     data() {
@@ -74,23 +80,6 @@ export default {
         }
         else
             this.checkCarStatus();
-
-        // if ('geolocation' in navigator) {
-        //     navigator.geolocation.getCurrentPosition(
-        //         (position) => {
-        //             const { latitude, longitude } = position.coords;
-        //             this.initializeMap(latitude, longitude);
-        //             this.loading = false;
-        //         },
-        //         (error) => {
-        //             console.error(`Erreur de géolocalisation: ${error.message}`);
-        //             this.loading = false;
-        //         }
-        //     );
-        // } else {
-        //     console.error("La géolocalisation n'est pas prise en charge par votre navigateur.");
-        //     this.loading = false;
-        // }
     },
     methods: {
         checkIsValet() {
@@ -145,7 +134,7 @@ export default {
 
                         const valetMarker = L.marker([valetPosition.latitude, valetPosition.longitude], { icon: redIcon })
                             .addTo(this.map)
-                            .bindPopup('Valet')
+                            .bindPopup('Vous êtes ici')
                             .openPopup();
 
                         this.getOtherCarsPositions();
@@ -172,8 +161,10 @@ export default {
                     data.forEach(user => {
                         const carMarker = L.marker([user.voiture.latitude, user.voiture.longitude])
                             .addTo(this.map)
-                            .bindPopup(`Voiture de ${user.username}`)
+                            .bindPopup(`<b>${user.username}</b><br/>${user.voiture.marque} ${user.voiture.modele}<br/>${user.voiture.plaque}<br/>${user.voiture.couleur}`)
                             .openPopup();
+
+
                     });
                 })
                 .catch(error => console.error("Erreur lors de la récupération des positions des voitures : ", error));
@@ -326,7 +317,7 @@ export default {
             if (now >= new Date().setHours(16, 0, 0, 0)) {
                 const tomorrow = new Date(now);
                 tomorrow.setDate(tomorrow.getDate() + 1);
-                return new Date(tomorrow.setHours(10, 0, 0, 0));
+                return new Date(tomorrow.setHours(11, 0, 0, 0));
             }
             return new Date(now + max);
         },
@@ -334,6 +325,10 @@ export default {
             const now = Date.now();
             const timeToLeaveTimestamp = new Date(timeToLeave).getTime();
             const timeDifference = timeToLeaveTimestamp - now;
+
+            if (timeDifference <= 0) {
+                return 'expiré';
+            }
 
             const secondsRemaining = Math.floor(timeDifference / 1000);
 
@@ -350,15 +345,22 @@ export default {
 
             const remainingMinutes = minutesRemaining % 60;
             return `${hoursRemaining} heures ${remainingMinutes} minutes`;
-        },
+        }
+        ,
         updateTimeRemaining() {
             // Parcourez les utilisateurs et mettez à jour le temps restant pour chacun
             this.users.forEach((user) => {
                 user.voiture.timeRemaining = this.calculateTimeRemaining(user.voiture.timeToLeave);
             });
         },
-
-
+        zoomToMarker(voiture) {
+            if (voiture) {
+                this.map.flyTo([voiture.latitude, voiture.longitude], this.map.getZoom());
+            }
+        },
+        moveCar(userId) {
+            this.$router.push({ name: 'moveCar', params: { idUser: userId } });
+        },
     },
 };
 </script>
@@ -381,6 +383,10 @@ export default {
     flex-direction: column;
     align-items: center;
     text-align: center;
+}
+
+.icon:hover {
+    opacity: 0.7;
 }
 </style>
   
