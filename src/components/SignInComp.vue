@@ -88,11 +88,6 @@ export default {
         },
         signIn() {
             if (this.validateForm()) {
-                console.log('Email:', this.email);
-                console.log('Nom:', this.nom);
-                console.log('Mot de passe:', this.password);
-                console.log('Confirmation mot de passe:', this.confPassword);
-
                 fetch("https://api-garenoticket-604fa7d27199.herokuapp.com/auth/signup", {
                     method: 'POST',
                     headers: {
@@ -115,11 +110,9 @@ export default {
                     .then(data => {
                         this.$router.push({
                             name: 'login',
-                            query: { email: this.email }
                         });
                     })
                     .catch(error => {
-                        console.error(error);
                         this.errorMessage = error.message;
                     });
             } else {

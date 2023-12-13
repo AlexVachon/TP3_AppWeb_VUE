@@ -145,7 +145,7 @@ export default {
                 .then(data => {
                     this.notification = "Voiture en mouvement..."
                 })
-                .catch(error => console.error('Erreur lors de la récupération des informations de l\'utilisateur', error))
+                .catch(error => console.error('Erreur lors du déplacement de la voiture', error))
         },
         parkingCar() {
             this.isParked = true;
@@ -175,7 +175,7 @@ export default {
                     this.notification = "Voiture stationnée..."
                     this.createHistoriqueDeplacement()
                 })
-                .catch(error => console.error('Erreur lors de la récupération des informations de l\'utilisateur', error))
+                .catch(error => console.error('Erreur lors du stationnement de la voiture', error))
         },
         zoomToCar() {
             if (this.carMarker) {
@@ -226,7 +226,7 @@ export default {
                 .then(data => {
                     this.notification = "Voiture en mouvement..."
                 })
-                .catch(error => console.error('Erreur lors de la récupération des informations de l\'utilisateur', error))
+                .catch(error => console.error('Erreur lors de la création de l\'historique de déplacement', error))
         },
     },
 };

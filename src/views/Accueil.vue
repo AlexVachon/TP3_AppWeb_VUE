@@ -194,7 +194,7 @@ export default {
 
                     });
                 })
-                .catch(error => console.error("Erreur lors de la récupération des positions des voitures : ", error));
+                .catch(error => console.error("Erreur lors de la récupération de la position des voitures : ", error));
         },
         initializeMapForUser() {
             if (this.hasCar && !this.hasNoPosition) {
@@ -330,7 +330,7 @@ export default {
                     this.carPosition.longitude = data.voiture.longitude
                     this.hasNoPosition = true
                 })
-                .catch(error => console.error('Erreur lors de la sauvegarde de la position de la voiture : ', error));
+                .catch(error => console.error('Erreur lors de la récupération de la voiture : ', error));
         },
         timeToLeave() {
             const now = Date.now();
