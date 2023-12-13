@@ -15,7 +15,9 @@ import { RouterLink, RouterView } from 'vue-router'
           <div class="collapse navbar-collapse" id="navbarNavDropdown">
             <ul class="navbar-nav">
               <li class="nav-item">
-                <RouterLink class="nav-link link-success shadow-sm" :to="{ name: 'home' }">MA PLACE</RouterLink>
+                <RouterLink class="nav-link link-success shadow-sm" :to="{ name: 'home' }">
+                  {{ isValet ? 'VALET' : 'MA PLACE' }}
+                </RouterLink>
               </li>
               <li class="nav-item">
                 <RouterLink class="nav-link link-success shadow-sm" :to="{ name: 'profil' }">PROFIL</RouterLink>
@@ -39,14 +41,16 @@ import { RouterLink, RouterView } from 'vue-router'
 
 
 <script>
+
 import { jwtDecode } from 'jwt-decode';
+
 export default {
   data() {
     return {
       isValet: false
     }
   },
-  mounted(){
+  mounted() {
     this.checkIfValet()
   },
   methods: {

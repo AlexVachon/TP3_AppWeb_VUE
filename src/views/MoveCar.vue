@@ -206,6 +206,9 @@ export default {
             }
             return new Date(now + max);
         },
+        createHistoriqueDeplacement(){
+
+        },
     },
 };
 </script>

@@ -26,9 +26,15 @@
                                 :class="{ 'is-invalid': !validateEmail(), 'is-valid': validateEmail() }" />
                             <div v-if="!validateEmail()" class="invalid-feedback">Adresse courriel invalide</div>
                         </div>
+                        <div v-if="isValet">
+                            <label for="price" class="form-label">Tarif</label>
+                            <input type="number" id="price" name="price" class="form-control"
+                                :class="{ 'is-invalid': !validatePrice(), 'is-valid': validatePrice() }"
+                                v-model="userInfo.tarif" min="0" />
+                        </div>
                     </section>
 
-                    <section class="card">
+                    <section class="card" v-if="!isValet">
                         <div class="card-body">
                             <div class="d-flex align-items-center justify-content-between">
                                 <h2>Voiture</h2>
@@ -85,9 +91,11 @@ import { jwtDecode } from 'jwt-decode';
 export default {
     data() {
         return {
+            isValet: false,
             userInfo: {
                 name: '',
                 email: '',
+                tarif: '',
             },
             carInfo: {
                 licensePlate: '',
@@ -118,15 +126,20 @@ export default {
                 }
             })
             .then(data => {
+                this.isValet = data.user.data.isValet
                 this.userInfo.name = data.user.data.username;
                 this.userInfo.email = data.user.data.email;
-                if (data.user.data.voiture) {
-                    this.carInfo.licensePlate = data.user.data.voiture.plaque;
-                    this.carInfo.model = data.user.data.voiture.modele;
-                    this.carInfo.color = data.user.data.voiture.couleur;
-                    this.carInfo.brand = data.user.data.voiture.marque;
-                } else {
-                    this.carValidationMessage = "Aucune voiture !"
+                this.userInfo.tarif = data.user.data.price
+
+                if (!this.isValet) {
+                    if (data.user.data.voiture) {
+                        this.carInfo.licensePlate = data.user.data.voiture.plaque;
+                        this.carInfo.model = data.user.data.voiture.modele;
+                        this.carInfo.color = data.user.data.voiture.couleur;
+                        this.carInfo.brand = data.user.data.voiture.marque;
+                    } else {
+                        this.carValidationMessage = "Aucune voiture !"
+                    }
                 }
             })
             .catch(error => console.error('Erreur lors de la récupération des informations de l\'utilisateur', error));
@@ -144,7 +157,6 @@ export default {
                 .then(response => response.json())
                 .then(data => {
                     this.isParked = data.user.data.voiture.isParked;
-                    console.log(this.isParked)
                 })
                 .catch(error => console.error("Erreur lors la récupération des données de l'utilisateur: ", error));
         },
@@ -166,6 +178,11 @@ export default {
         validateColor() {
             return /^[A-Za-z]{3,50}$/.test(this.carInfo.color.trim());
         },
+        validatePrice() {
+            if (this.userInfo.tarif < 0)
+                return false
+            return true
+        },
         updateProfile() {
             if (this.isFormValid) {
                 fetch(`https://api-garenoticket-604fa7d27199.herokuapp.com/user/${jwtDecode(localStorage.getItem('jwt')).id}`, {
@@ -177,37 +194,39 @@ export default {
                     body: JSON.stringify({
                         email: this.userInfo.email,
                         username: this.userInfo.name,
+                        price: this.userInfo.tarif
                     })
                 })
                     .then(response => {
                         return response.json()
                     })
                     .then(data => {
-                        console.log(data.message)
                         this.userValidationMessage = data.message
                     })
                     .catch(error => console.error('Erreur lors de la mise à jour du profil', error));
-                fetch(`https://api-garenoticket-604fa7d27199.herokuapp.com/car/${jwtDecode(localStorage.getItem('jwt')).id}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('jwt')}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        marque: this.carInfo.marque,
-                        modele: this.carInfo.model,
-                        couleur: this.carInfo.color,
-                        plaque: this.carInfo.licensePlate
+                if (!this.isValet) {
+                    fetch(`https://api-garenoticket-604fa7d27199.herokuapp.com/car/${jwtDecode(localStorage.getItem('jwt')).id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('jwt')}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            marque: this.carInfo.marque,
+                            modele: this.carInfo.model,
+                            couleur: this.carInfo.color,
+                            plaque: this.carInfo.licensePlate
+                        })
                     })
-                })
-                    .then(response => {
-                        return response.json()
-                    })
-                    .then(data => {
-                        console.log(data.message)
-                        this.carValidationMessage = data.message
-                    })
-                    .catch(error => console.error('Erreur lors de la récupération des informations de l\'utilisateur', error))
+                        .then(response => {
+                            return response.json()
+                        })
+                        .then(data => {
+                            console.log(data.message)
+                            this.carValidationMessage = data.message
+                        })
+                        .catch(error => console.error('Erreur lors de la récupération des informations de l\'utilisateur', error))
+                }
             } else {
                 console.error("Le formulaire n'est pas valide. Veuillez corriger les champs invalides.");
             }
@@ -215,11 +234,10 @@ export default {
         },
     },
     watch: {
-        // Surveillez les changements dans les champs et mettez à jour isFormValid en conséquence
         userInfo: {
             deep: true,
             handler() {
-                this.isFormValid = this.validateName() && this.validateEmail();
+                this.isFormValid = this.validateName() && this.validateEmail() && this.validatePrice();
             },
         },
         carInfo: {

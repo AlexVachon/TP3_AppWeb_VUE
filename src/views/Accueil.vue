@@ -24,8 +24,9 @@
                         <a href="#" @click="saveCarPosition" class="btn btn-light shadow-sm mx-2"
                             :class="{ 'disabled': isParked }">JE LAISSE MA VOITURE</a>
                         <a href="#" @click="recoverCar" class="btn btn-light shadow-sm mx-2"
-                            :class="{ 'disabled': !isParked || isMoving}">J'AI RÉCUPÉRÉ MA VOITURE</a>
-                        <img @click="zoomToMarker(this.carPosition)" src="/icons/zoomTo.png" class="icon mx-2" alt="Moving To Car">
+                            :class="{ 'disabled': !isParked || isMoving }">J'AI RÉCUPÉRÉ MA VOITURE</a>
+                        <img @click="zoomToMarker(this.carPosition)" src="/icons/zoomTo.png" class="icon mx-2"
+                            alt="Moving To Car">
                     </div>
                 </div>
                 <div v-else>
@@ -56,8 +57,12 @@
                                         alt="Move Car">
                                 </td>
                             </tr>
+                            <div v-if="!users || users.length === 0">
+                                <p class="text-center fw-lighter my-2">No data available.</p>
+                            </div>
                         </tbody>
                     </table>
+
                 </div>
 
             </div>
@@ -145,7 +150,7 @@ export default {
                             iconUrl: '/icons/red-icon.png',
                             iconSize: [25, 35],
                             iconAnchor: [13.98, 40],
-                            popupAnchor:  [0, -40]
+                            popupAnchor: [0, -40]
                         });
 
                         const valetMarker = L.marker([valetPosition.latitude, valetPosition.longitude], { icon: redIcon })
