@@ -102,10 +102,9 @@ export default {
         },
         getUserInfo() {
             const idUser = this.$route.params.idUser;
-            fetch(`https://api-garenoticket-604fa7d27199.herokuapp.com/user/`, {
+            fetch(`https://api-garenoticket-604fa7d27199.herokuapp.com/user/${idUser}`, {
                 method: 'GET',
                 headers: {
-                    'Authorization': idUser,
                     'Content-Type': 'application/json'
                 },
             })
@@ -117,7 +116,7 @@ export default {
                     }
                 })
                 .then(data => {
-                    this.user = data.user.data
+                    this.user = data
                     this.initializeMap(this.user.voiture.latitude, this.user.voiture.longitude)
                 })
                 .catch(error => console.error('Erreur lors de la récupération des informations de l\'utilisateur', error));
@@ -174,6 +173,7 @@ export default {
                 })
                 .then(data => {
                     this.notification = "Voiture stationnée..."
+                    this.createHistoriqueDeplacement()
                 })
                 .catch(error => console.error('Erreur lors de la récupération des informations de l\'utilisateur', error))
         },
@@ -209,8 +209,8 @@ export default {
         },
         createHistoriqueDeplacement(){
 
-            fetch(`https://api-garenoticket-604fa7d27199.herokuapp.com/'/historique/create/`, {
-                method: 'PUT',
+            fetch(`https://api-garenoticket-604fa7d27199.herokuapp.com/historique/create/`, {
+                method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('jwt')}`,
                     'Content-Type': 'application/json'

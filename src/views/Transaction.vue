@@ -66,7 +66,7 @@
                             <tr v-for="(facture) in historique">
                                 <td>{{ facture.createdAt }}</td>
                                 <td>{{ facture.price }}</td>
-                                <td>{{ facture.isPaid }}</td>
+                                <td>{{ facture.isPaid ? 'Oui' : 'Non' }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -127,11 +127,12 @@ export default {
                 .then(data => {
                     this.historique = data
                     let total = 0.0
-                    for(d in data){
-                        if(!data.isPaid){
-                            total += data.price
+                    for(const d of this.historique){
+                        if(!d.isPaid){
+                            total += d.price
                         }
                     }
+                    this.montantPayer = total
                 })
                 .catch(error => console.error(error))
         }
