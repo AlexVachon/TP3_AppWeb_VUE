@@ -102,9 +102,10 @@ export default {
         },
         getUserInfo() {
             const idUser = this.$route.params.idUser;
-            fetch(`https://api-garenoticket-604fa7d27199.herokuapp.com/user?userId=${idUser}`, {
+            fetch(`https://api-garenoticket-604fa7d27199.herokuapp.com/user/`, {
                 method: 'GET',
                 headers: {
+                    'Authorization': idUser,
                     'Content-Type': 'application/json'
                 },
             })
@@ -208,6 +209,24 @@ export default {
         },
         createHistoriqueDeplacement(){
 
+            fetch(`https://api-garenoticket-604fa7d27199.herokuapp.com/'/historique/create/`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('jwt')}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    isMoving: true,
+                    userId: this.user._id
+                })
+            })
+                .then(response => {
+                    return response.json()
+                })
+                .then(data => {
+                    this.notification = "Voiture en mouvement..."
+                })
+                .catch(error => console.error('Erreur lors de la récupération des informations de l\'utilisateur', error))
         },
     },
 };

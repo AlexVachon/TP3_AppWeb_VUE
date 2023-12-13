@@ -121,7 +121,7 @@ export default {
             }
         },
         checkCarStatus() {
-            fetch(`https://api-garenoticket-604fa7d27199.herokuapp.com/user?userId=${jwtDecode(localStorage.getItem('jwt')).id}`, {
+            fetch(`https://api-garenoticket-604fa7d27199.herokuapp.com/user/`, {
                 method: "GET",
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('jwt')}`,
@@ -207,8 +207,9 @@ export default {
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(
                         (position) => {
-                            const { latitude, longitude } = position.coords;
-                            this.initializeMap(latitude, longitude);
+                            this.carPosition.latitude = position.coords.latitude
+                            this.carPosition.longitude =  position.coords.longitude
+                            this.initializeMap(this.carPosition.latitude, this.carPosition.longitude);
                             this.showCurrentPosition();
                             this.loading = false;
                         },

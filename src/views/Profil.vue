@@ -110,8 +110,7 @@ export default {
         };
     },
     mounted() {
-        this.checkCarStatus()
-        fetch(`https://api-garenoticket-604fa7d27199.herokuapp.com/user?userId=${jwtDecode(localStorage.getItem('jwt')).id}`, {
+        fetch(`https://api-garenoticket-604fa7d27199.herokuapp.com/user/`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('jwt')}`,
@@ -133,6 +132,7 @@ export default {
 
                 if (!this.isValet) {
                     if (data.user.data.voiture) {
+                        this.isParked = data.user.data.voiture.isParked;
                         this.carInfo.licensePlate = data.user.data.voiture.plaque;
                         this.carInfo.model = data.user.data.voiture.modele;
                         this.carInfo.color = data.user.data.voiture.couleur;
@@ -146,20 +146,6 @@ export default {
 
     },
     methods: {
-        checkCarStatus() {
-            fetch(`https://api-garenoticket-604fa7d27199.herokuapp.com/user?userId=${jwtDecode(localStorage.getItem('jwt')).id}`, {
-                method: "GET",
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('jwt')}`,
-                    'Content-Type': 'application/json'
-                }
-            })
-                .then(response => response.json())
-                .then(data => {
-                    this.isParked = data.user.data.voiture.isParked;
-                })
-                .catch(error => console.error("Erreur lors la récupération des données de l'utilisateur: ", error));
-        },
         validateName() {
             return /^[A-Za-z0-9]{3,50}$/.test(this.userInfo.name.trim());
         },
