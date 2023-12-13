@@ -30,7 +30,7 @@
                     </div>
                 </div>
                 <div v-else>
-                    <div class="d-flex justify-content-start align-items-center">
+                    <div class="d-flex justify-content-start align-items-center my-2">
                         <img @click="zoomToMarker(this.valetPosition)" class="icon" src="/icons/zoomTo.png" alt="Zoomer">
                         <div class="text-center fw-lighter">Votre position</div>
                     </div>
