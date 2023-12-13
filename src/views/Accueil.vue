@@ -10,11 +10,22 @@
             <div id="map" style="height: 400px;"></div>
             <div class="card-body border-top bg-light-subtle shadow">
                 <div v-if="!isValet">
-                    <div class="d-flex justify-content-center">
+                    <div v-if="isMoving">
+                        <div class="alert alert-primary d-flex align-items-center" role="alert" style="height: 25px;">
+                            <svg class="bi flex-shrink-0 me-2" role="img" aria-label="Info:" style="width: 15px;">
+                                <use xlink:href="#info-fill" />
+                            </svg>
+                            <div>
+                                Votre voiture est en cours de déplacement...
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-center align-items-center">
                         <a href="#" @click="saveCarPosition" class="btn btn-light shadow-sm mx-2"
                             :class="{ 'disabled': isParked }">JE LAISSE MA VOITURE</a>
                         <a href="#" @click="recoverCar" class="btn btn-light shadow-sm mx-2"
-                            :class="{ 'disabled': !isParked }">J'AI RÉCUPÉRÉ MA VOITURE</a>
+                            :class="{ 'disabled': !isParked || isMoving}">J'AI RÉCUPÉRÉ MA VOITURE</a>
+                        <img @click="zoomToMarker(this.carPosition)" src="/icons/zoomTo.png" class="icon mx-2" alt="Moving To Car">
                     </div>
                 </div>
                 <div v-else>
@@ -63,6 +74,7 @@ export default {
     data() {
         return {
             isValet: false,
+            isMoving: false,
             loading: true,
             hasCar: false,
             isParked: false,
@@ -112,6 +124,8 @@ export default {
                     this.carPosition.latitude = data.user.data.voiture?.latitude
                     this.carPosition.longitude = data.user.data.voiture?.longitude
                     this.hasNoPosition = !this.carPosition.latitude && !this.carPosition.longitude;
+
+                    this.isMoving = data.user.data.voiture.isMoving
                     this.initializeMapForUser();
                 })
                 .catch(error => console.error("Erreur lors la récupération des données de l'utilisateur: ", error));
@@ -130,7 +144,8 @@ export default {
                         const redIcon = new L.Icon({
                             iconUrl: '/icons/red-icon.png',
                             iconSize: [25, 35],
-                            iconAnchor:  [13.98, 40],
+                            iconAnchor: [13.98, 40],
+                            popupAnchor:  [0, -40]
                         });
 
                         const valetMarker = L.marker([valetPosition.latitude, valetPosition.longitude], { icon: redIcon })
@@ -171,7 +186,6 @@ export default {
                 .catch(error => console.error("Erreur lors de la récupération des positions des voitures : ", error));
         },
         initializeMapForUser() {
-            console.log(this.carPosition.latitude, this.carPosition.longitude);
             if (this.hasCar && !this.hasNoPosition) {
                 console.log('Initialize map for car position');
                 this.initializeMap(this.carPosition.latitude, this.carPosition.longitude);
@@ -387,6 +401,10 @@ export default {
     flex-direction: column;
     align-items: center;
     text-align: center;
+}
+
+.icon {
+    height: 4%;
 }
 
 .icon:hover {
