@@ -55,9 +55,9 @@
 </template>
   
 <script>
-    import { jwtDecode } from 'jwt-decode';
-    import 'leaflet/dist/leaflet.css';
-    import L from 'leaflet';
+import { jwtDecode } from 'jwt-decode';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 
 export default {
     data() {
@@ -130,6 +130,7 @@ export default {
                         const redIcon = new L.Icon({
                             iconUrl: '/icons/red-icon.png',
                             iconSize: [25, 35],
+                            iconAnchor:  [13.98, 40],
                         });
 
                         const valetMarker = L.marker([valetPosition.latitude, valetPosition.longitude], { icon: redIcon })
@@ -247,7 +248,7 @@ export default {
             const userId = jwtDecode(localStorage.getItem('jwt')).id;
             const carId = userId;
             const isParked = !this.isParked;
-            const timetoleave = this.TimeToLeave()
+            const timetoleave = this.timeToLeave()
 
             this.carPosition.latitude = this.carMarker.getLatLng().lat;
             this.carPosition.longitude = this.carMarker.getLatLng().lng;
@@ -305,10 +306,10 @@ export default {
                 })
                 .catch(error => console.error('Erreur lors de la sauvegarde de la position de la voiture : ', error));
         },
-        TimeToLeave() {
+        timeToLeave() {
             const now = Date.now();
 
-            const max = 60 * 60 * 1000; // 1h
+            const max = 60 * 60 * 1000;
 
             if (now >= new Date().setHours(11, 0, 0, 0) && now <= new Date().setHours(12, 30, 0, 0)) {
                 return new Date().setHours(14, 30, 0, 0)
@@ -317,7 +318,11 @@ export default {
             if (now >= new Date().setHours(16, 0, 0, 0)) {
                 const tomorrow = new Date(now);
                 tomorrow.setDate(tomorrow.getDate() + 1);
-                return new Date(tomorrow.setHours(11, 0, 0, 0));
+                return tomorrow.setHours(10, 0, 0, 0);
+            }
+
+            if (now <= new Date().setHours(9, 0, 0, 0)) {
+                return new Date().setHours(11, 0, 0, 0)
             }
             return new Date(now + max);
         },
@@ -345,8 +350,7 @@ export default {
 
             const remainingMinutes = minutesRemaining % 60;
             return `${hoursRemaining} heures ${remainingMinutes} minutes`;
-        }
-        ,
+        },
         updateTimeRemaining() {
             // Parcourez les utilisateurs et mettez à jour le temps restant pour chacun
             this.users.forEach((user) => {
