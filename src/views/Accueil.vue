@@ -30,6 +30,11 @@
                     </div>
                 </div>
                 <div v-else>
+                    <div class="d-flex justify-content-start align-items-center">
+                        <img @click="zoomToMarker(this.valetPosition)" class="icon" src="/icons/zoomTo.png" alt="Zoomer">
+                        <div class="text-center fw-lighter">Votre position</div>
+                    </div>
+
                     <table class="table table-hover m-auto shadow-sm" style="width: 95%;">
                         <thead class="table-light">
                             <tr>
@@ -86,6 +91,7 @@ export default {
             carPosition: { latitude: 0, longitude: 0 },
             hasNoPosition: true,
             carMarker: null,
+            valetPosition: { latitude: 0, longitude: 0 },
             users: [],
         };
     },
@@ -139,12 +145,12 @@ export default {
             if ('geolocation' in navigator) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
-                        const valetPosition = {
+                        this.valetPosition = {
                             latitude: position.coords.latitude,
                             longitude: position.coords.longitude
                         };
 
-                        this.initializeMap(valetPosition.latitude, valetPosition.longitude);
+                        this.initializeMap(this.valetPosition.latitude, this.valetPosition.longitude);
 
                         const redIcon = new L.Icon({
                             iconUrl: '/icons/red-icon.png',
@@ -153,7 +159,7 @@ export default {
                             popupAnchor: [0, -40]
                         });
 
-                        const valetMarker = L.marker([valetPosition.latitude, valetPosition.longitude], { icon: redIcon })
+                        const valetMarker = L.marker([this.valetPosition.latitude, this.valetPosition.longitude], { icon: redIcon })
                             .addTo(this.map)
                             .bindPopup('Vous êtes ici')
                             .openPopup();
