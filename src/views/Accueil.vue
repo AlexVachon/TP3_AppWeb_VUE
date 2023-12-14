@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div class="card m-auto mt-5" style="max-width: 900px;">
+        <div class="card m-auto my-5" style="max-width: 900px;">
             <div v-if="loading" class="loading-overlay">
                 <div class="loading-content">
                     <img src="/loading-gif.gif" style="width: 20px;" alt="Loading GIF">
@@ -20,11 +20,23 @@
                             </div>
                         </div>
                     </div>
+                    <div v-if="notification">
+                        <div class="alert alert-primary d-flex align-items-center" role="alert" style="height: 25px;">
+                            <svg class="bi flex-shrink-0 me-2" role="img" aria-label="Info:" style="width: 15px;">
+                                <use xlink:href="#info-fill" />
+                            </svg>
+                            <div>
+                                {{ notification }}
+                            </div>
+                        </div>
+                    </div>
                     <div class="d-flex justify-content-center align-items-center">
                         <a href="#" @click="saveCarPosition" class="btn btn-light shadow-sm mx-2"
-                            :class="{ 'disabled': isParked }">JE LAISSE MA VOITURE</a>
+                            :class="{ 'disabled': isParked || !hasPaidHisto }">JE LAISSE MA VOITURE</a>
+
                         <a href="#" @click="recoverCar" class="btn btn-light shadow-sm mx-2"
-                            :class="{ 'disabled': !isParked || isMoving }">J'AI RÉCUPÉRÉ MA VOITURE</a>
+                            :class="{ 'disabled': !isParked || isMoving || !hasPaidHisto }">J'AI RÉCUPÉRÉ MA VOITURE</a>
+
                         <img @click="zoomToMarker(this.carPosition)" src="/icons/zoomTo.png" class="icon mx-2"
                             alt="Moving To Car">
                     </div>
@@ -73,6 +85,13 @@
             </div>
         </div>
     </div>
+
+    <svg xmlns="http://www.w3.org/2000/svg" class="d-none">
+        <symbol id="info-fill" viewBox="0 0 16 16">
+            <path
+                d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+        </symbol>
+    </svg>
 </template>
   
 <script>
@@ -83,6 +102,7 @@ import L from 'leaflet';
 export default {
     data() {
         return {
+            hasPaidHisto: true,
             isValet: false,
             isMoving: false,
             loading: true,
@@ -93,6 +113,7 @@ export default {
             carMarker: null,
             valetPosition: { latitude: 0, longitude: 0 },
             users: [],
+            notification: "",
         };
     },
     mounted() {
@@ -137,6 +158,7 @@ export default {
                     this.hasNoPosition = !this.carPosition.latitude && !this.carPosition.longitude;
 
                     this.isMoving = data.user.data.voiture.isMoving
+                    this.getAllUserHisto()
                     this.initializeMapForUser();
                 })
                 .catch(error => console.error("Erreur lors la récupération des données de l'utilisateur: ", error));
@@ -208,7 +230,7 @@ export default {
                     navigator.geolocation.getCurrentPosition(
                         (position) => {
                             this.carPosition.latitude = position.coords.latitude
-                            this.carPosition.longitude =  position.coords.longitude
+                            this.carPosition.longitude = position.coords.longitude
                             this.initializeMap(this.carPosition.latitude, this.carPosition.longitude);
                             this.showCurrentPosition();
                             this.loading = false;
@@ -391,6 +413,37 @@ export default {
         moveCar(userId) {
             this.$router.push({ name: 'moveCar', params: { idUser: userId } });
         },
+        getAllUserHisto() {
+
+            fetch(`https://api-garenoticket-604fa7d27199.herokuapp.com/historique`, {
+                method: "GET",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('jwt')}`,
+                },
+            })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json()
+                    } else {
+                        throw new Error("Erreur lors de la récupération de l'historique des déplacements.")
+                    }
+                })
+                .then(data => {
+                    this.historique = data
+                    let total = 0.0
+                    for (const d of this.historique) {
+                        if (!d.isPaid) {
+                            total += d.price
+                        }
+                    }
+                    if (total >= 20) {
+                        this.hasPaidHisto = false
+                        this.notification = "Vous devez payer vos déplacements précédents pour utiliser nos services!"
+                    }
+                })
+                .catch(error => console.error(error))
+        }
     },
 };
 </script>

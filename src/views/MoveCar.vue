@@ -224,7 +224,7 @@ export default {
                     return response.json()
                 })
                 .then(data => {
-                    this.notification = "Voiture en mouvement..."
+                    this.notification = "Historique de déplacement créé..."
                 })
                 .catch(error => console.error('Erreur lors de la création de l\'historique de déplacement', error))
         },

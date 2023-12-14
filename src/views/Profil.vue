@@ -198,7 +198,7 @@ export default {
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
-                            marque: this.carInfo.marque,
+                            marque: this.carInfo.brand,
                             modele: this.carInfo.model,
                             couleur: this.carInfo.color,
                             plaque: this.carInfo.licensePlate
